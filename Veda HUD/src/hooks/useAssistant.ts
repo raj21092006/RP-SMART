@@ -3,7 +3,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { initialActivity, initialTasks } from '../data';
 import type { ActivityEvent, AssistantMode, Message, Task } from '../types';
 
-const API_URL = 'http://127.0.0.1:8000';
+const API_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000';
 
 const readTasks = (): Task[] => {
   try {
