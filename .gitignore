@@ -1,0 +1,21 @@
+venv/
+.venv/
+__pycache__/
+*.pyc
+.env
+.env.*
+!.env.example
+*.db
+*.sqlite3
+node_modules/
+dist/
+.DS_Store
+Modelfile*
+*.backup
+*weather-backup*
+scripts/Ollama-USB-Monitor.ps1
+
+*.backup
+*weather-backup*
+
+Veda HUD/src/styles.backup.css
