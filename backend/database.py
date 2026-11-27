@@ -16,10 +16,11 @@ def get_connection():
 
 
 def init_db():
-    """Create conversation and message tables."""
+    """Create conversation, message and memory tables."""
     connection = get_connection()
     cursor = connection.cursor()
 
+    # Conversations table
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS conversations (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -28,6 +29,7 @@ def init_db():
         )
     """)
 
+    # Messages table
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS messages (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -37,6 +39,17 @@ def init_db():
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (conversation_id)
                 REFERENCES conversations (id)
+        )
+    """)
+
+    # Long-term memories table
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS memories (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            memory_key TEXT UNIQUE NOT NULL,
+            memory_value TEXT NOT NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     """)
 
@@ -55,6 +68,7 @@ def create_conversation(title="New Conversation"):
     )
 
     conversation_id = cursor.lastrowid
+
     connection.commit()
     connection.close()
 
@@ -75,6 +89,7 @@ def save_message(conversation_id, role, content):
     )
 
     message_id = cursor.lastrowid
+
     connection.commit()
     connection.close()
 
@@ -135,3 +150,38 @@ def update_conversation_title(conversation_id, title):
 
     connection.commit()
     connection.close()
+
+
+def save_memory(memory_key, memory_value):
+    """Save or update a long-term memory."""
+    connection = get_connection()
+    cursor = connection.cursor()
+
+    cursor.execute("""
+        INSERT INTO memories (memory_key, memory_value)
+        VALUES (?, ?)
+        ON CONFLICT(memory_key)
+        DO UPDATE SET
+            memory_value = excluded.memory_value,
+            updated_at = CURRENT_TIMESTAMP
+    """, (memory_key, memory_value))
+
+    connection.commit()
+    connection.close()
+
+
+def get_memories():
+    """Retrieve all long-term memories."""
+    connection = get_connection()
+    cursor = connection.cursor()
+
+    cursor.execute("""
+        SELECT memory_key, memory_value
+        FROM memories
+        ORDER BY id ASC
+    """)
+
+    memories = cursor.fetchall()
+    connection.close()
+
+    return [dict(memory) for memory in memories]
